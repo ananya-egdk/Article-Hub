@@ -1,0 +1,51 @@
+﻿@page "/"
+@using ArticleHub.Models
+@using ArticleHub.Services
+@inject NavigationManager NavigationManager
+@inject ArticleService ArticleService
+
+<h3 class="header">Articles</h3>
+
+@if (articles == null)
+{
+    <p class="loading">Loading articles...</p>
+}
+else if (articles.Count == 0)
+{
+    <p class="no-articles">No articles found.</p>
+}
+else
+{
+    <div class="articles-grid">
+        @foreach (var article in articles.OrderBy(t => t.Id))
+        {
+            <div class="article-card">
+                <h4 class="article-title">@article.Title</h4>
+                <p class="article-summary">@article.Summary</p>
+                <button class="read-more" @onclick="(() => SelectArticle(article.Id))">Click here to know more!</button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+
+    private List<Articles> articles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            articles = await ArticleService.GetArticlesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void SelectArticle(int id)
+    {
+        NavigationManager.NavigateTo($"/article/{id}");
+    }
+}

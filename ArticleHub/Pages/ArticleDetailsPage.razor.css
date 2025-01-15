@@ -1,0 +1,14 @@
+﻿.article-details {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+    background-color: #e6f2ff;
+    border-radius: 8px;
+    border: 1px solid #b3d1ff;
+}
+
+.article-full-text {
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.6;
+}
