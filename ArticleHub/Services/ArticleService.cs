@@ -41,14 +41,6 @@ namespace ArticleHub.Services
 
                 return data;
             }
-            catch (HttpRequestException ex)
-            {
-                throw new Exception($"HTTP error while fetching data: {ex.Message}", ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new Exception($"Data processing error: {ex.Message}", ex);
-            }
             catch (Exception ex)
             {
                 throw new Exception($"An error occurred while fetching data: {ex.Message}", ex);
