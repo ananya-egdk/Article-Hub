@@ -6,11 +6,15 @@
 
 <h3 class="header">Articles</h3>
 
-@if (articles == null)
+@if (IsLoading)
 {
     <p class="loading">Loading articles...</p>
 }
-else if (articles.Count == 0)
+else if (ErrorMessage != null)
+{
+    <div class="error-message">@ErrorMessage</div>
+}
+else if (articles == null || articles.Count == 0)
 {
     <p class="no-articles">No articles found.</p>
 }
@@ -30,17 +34,25 @@ else
 
 @code {
 
-    private List<Articles> articles;
+    private List<Articles>? articles;
+    private bool IsLoading = true;
+    private string? ErrorMessage;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            IsLoading = true;
             articles = await ArticleService.GetArticlesAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            ErrorMessage = "An error occurred while fetching articles. Please try again later.";
+            Console.Error.WriteLine($"Error fetching articles: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 

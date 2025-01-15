@@ -9,30 +9,49 @@ namespace ArticleHub.Services
 
         public ArticleService(HttpClient httpClient)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         public async Task<List<Articles>> GetArticlesAsync()
         {
-            try
-            {
-                return await _httpClient.GetFromJsonAsync<List<Articles>>("https://ps-dev-1-partnergateway.patientsky.dev/assignment/articles");
-            }
-            catch (Exception)
-            {
-                throw new Exception("Failed to fetch articles.");
-            }
+            return await FetchDataAsync<List<Articles>>("https://ps-dev-1-partnergateway.patientsky.dev/assignment/articles");
         }
 
         public async Task<Articles> GetArticleByIdAsync(int id)
         {
+            return await FetchDataAsync<Articles>($"https://ps-dev-1-partnergateway.patientsky.dev/assignment/articles/{id}");
+        }
+
+        private async Task<T> FetchDataAsync<T>(string url)
+        {
             try
             {
-                return await _httpClient.GetFromJsonAsync<Articles>($"https://ps-dev-1-partnergateway.patientsky.dev/assignment/articles/{id}");
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException($"Request to {url} failed with status code {response.StatusCode}.");
+                }
+
+                var data = await response.Content.ReadFromJsonAsync<T>();
+                if (data == null)
+                {
+                    throw new InvalidOperationException($"Received null data from {url}.");
+                }
+
+                return data;
             }
-            catch (Exception)
+            catch (HttpRequestException ex)
             {
-                throw new Exception("Failed to fetch the article details.");
+                throw new Exception($"HTTP error while fetching data: {ex.Message}", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new Exception($"Data processing error: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while fetching data: {ex.Message}", ex);
             }
         }
     }

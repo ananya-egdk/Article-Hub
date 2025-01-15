@@ -5,9 +5,17 @@
 
 <h3 class="header">Article Details</h3>
 
-@if (Article == null)
+@if (IsLoading)
 {
     <p class="loading">Loading...</p>
+}
+else if (ErrorMessage != null)
+{
+    <div class="error-message">@ErrorMessage</div>
+}
+else if (Article == null)
+{
+    <p class="not-found">Article not found.</p>
 }
 else
 {
@@ -23,9 +31,29 @@ else
     public int Id { get; set; }
 
     private Articles? Article;
+    private bool IsLoading = true;
+    private string? ErrorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        Article = await ArticleService.GetArticleByIdAsync(Id);
+        try
+        {
+            IsLoading = true;
+            Article = await ArticleService.GetArticleByIdAsync(Id);
+
+            if (Article == null)
+            {
+                ErrorMessage = "The requested article does not exist.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while fetching the article. Please try again later.";
+            Console.Error.WriteLine($"Error fetching article: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 }
